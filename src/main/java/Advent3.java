@@ -35,28 +35,31 @@ public class Advent3 {
 
         }).collect(Collectors.toSet());
 
-        int totalWidth = claims.stream().mapToInt(c -> c[1] + c[3]).max().getAsInt(); int totalHeight = claims.stream().mapToInt(c -> c[2] + c[4]).max().getAsInt();
+        int totalWidth  = claims.stream().mapToInt(c -> c[1] + c[3]).max().getAsInt();
+        int totalHeight = claims.stream().mapToInt(c -> c[2] + c[4]).max().getAsInt();
 
-        int[][] fabric = new int[totalWidth][totalHeight]; int[][] fabricIds = new int[totalWidth][totalHeight];
+        int[][] fabric    = new int[totalWidth][totalHeight];
+        int[][] fabricIds = new int[totalWidth][totalHeight];
 
         Set<Integer> idsWithOverlap = new HashSet<>();
 
+        int inches = 0;
+
         for (int[] c : claims)
             for (int l = c[1]; l < c[1] + c[3]; l++)
-                for (int t = c[2]; t < c[2] + c[4]; t++)
+                for (int t = c[2]; t < c[2] + c[4]; t++) {
                     if (++fabric[l][t] == 1) fabricIds[l][t] = c[0];
                     else {
-                        idsWithOverlap.add(fabricIds[l][t]); idsWithOverlap.add(c[0]);
+                        idsWithOverlap.add(fabricIds[l][t]);
+                        idsWithOverlap.add(c[0]);
                     }
-
-        int inches = 0;
+                    if (fabric[l][t] == 2) inches++;
+                }
 
         int[] finalPatch = claims.stream().mapToInt(c -> c[0]).filter(id -> !idsWithOverlap.contains(id)).toArray();
 
-        for (int l = 0; l < fabric.length; l++)
-            for (int t = 0; t < fabric[l].length; t++) if (fabric[l][t] > 1) inches++;
-
-        System.out.println(inches); System.out.println(Arrays.toString(finalPatch));
+        System.out.println(inches);
+        System.out.println(Arrays.toString(finalPatch));
     }
 
 }
