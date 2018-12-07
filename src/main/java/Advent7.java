@@ -9,18 +9,25 @@ import java.util.stream.IntStream;
 
 public class Advent7 {
 
-    private static final int                DURATION  = 60;
-    private static final int                numWorker = 5;
-    private final        Set<Character>     doneNode  = new HashSet<>();
-    private final        int[][]            worker    = new int[Advent7.numWorker][2];
+    private static final int                DURATION       = 60;
+    private static final int                numWorker      = 5;
+    private final        Set<Character>     doneNode       = new HashSet<>();
+    private final        int[][]            worker         = new int[Advent7.numWorker][2];
     private              int[][]            adj;
     private              int                countNodes;
     private              Set<Character>     nodes;
-    private              TreeSet<Character> availableNodes;
+    private              TreeSet<Character> availableNodes = new TreeSet<>();
+
+    private Advent7(Collection<Character[]> edges) {
+        this.nodes = edges.stream().flatMap(Arrays::stream).collect(Collectors.toSet());
+        this.countNodes = (int) edges.stream().flatMap(Arrays::stream).distinct().count();
+        this.adj = new int[this.countNodes][this.countNodes];
+
+        edges.stream().map(e -> new Integer[]{e[0] % this.countNodes, e[1] % this.countNodes}).forEach(edge -> this.adj[edge[0]][edge[1]] = 1);
+        IntStream.range(0, Advent7.numWorker).forEach(i -> Arrays.fill(this.worker[i], -1));
+    }
 
     public static void main(final String... args) throws IOException {
-
-        final Advent7 advent = new Advent7();
 
         final Pattern r = Pattern.compile("Step (\\w) must be finished before step (\\w) can begin.");
 
@@ -36,17 +43,17 @@ public class Advent7 {
             return edge;
         }).collect(Collectors.toSet());
 
-        final List<Character> sequence = advent.getSequence(edges);
+        final Advent7 advent = new Advent7(edges);
 
-        System.out.println(sequence.stream().map(Object::toString).reduce((acc, e) -> acc + e).get());
+        System.out.println(advent.getSequence().stream().map(Object::toString).reduce((acc, e) -> acc + e).get());
 
         advent.reset();
 
-        System.out.println(advent.process());
+        System.out.println("\n" + advent.process());
     }
 
     private static int getStepDuration(final Character node) {
-        return Advent7.DURATION + (node - 'A');
+        return Advent7.DURATION + ((node - 'A') + 1);
     }
 
     private void reset() {
@@ -57,15 +64,15 @@ public class Advent7 {
 
     private int process() {
         int seconds = 0;
-
         this.initAvailableNodes();
 
         while (!this.availableNodes.isEmpty() || this.areSomeWorkersWorking()) {
             this.processStep();
+            print(worker);
             seconds++;
         }
 
-        return seconds;
+        return seconds - 1;
     }
 
     private boolean areSomeWorkersWorking() {
@@ -74,26 +81,27 @@ public class Advent7 {
 
     @SuppressWarnings("ConstantConditions")
     private void processStep() {
-        for (int i = 0; i < Advent7.numWorker; i++)
-            if (this.worker[i][0] == -1 || this.worker[i][1] == 0) {
-                if (this.worker[i][1] == 0) this.follow((char) this.worker[i][0]);
-                if (!this.availableNodes.isEmpty()) {
-                    final Character node = this.availableNodes.pollFirst();
-                    this.worker[i][0] = node;
-                    this.worker[i][1] = Advent7.getStepDuration(node);
-                }
-            } else this.worker[i][1]--;
+        IntStream.range(0, Advent7.numWorker).filter(i -> this.worker[i][0] != -1).forEach(i -> this.worker[i][1]--);
+
+        IntStream.range(0, Advent7.numWorker).filter(i -> this.worker[i][0] != -1 && this.worker[i][1] == 0).forEach(i -> {
+            this.follow((char) this.worker[i][0]);
+            this.worker[i][0] = this.worker[i][1] = -1;
+        });
+
+        //System.err.print(node);
+        IntStream.range(0, Advent7.numWorker).filter(i -> this.worker[i][0] == -1 || this.worker[i][1] == 0).filter(i -> !this.availableNodes.isEmpty()).forEach(i -> {
+            final Character node = this.availableNodes.pollFirst();
+            this.worker[i][0] = node;
+            this.worker[i][1] = Advent7.getStepDuration(node);
+        });
     }
 
-    private List<Character> getSequence(final Collection<Character[]> edges) {
-        this.countNodes = (int) edges.stream().flatMap(Arrays::stream).distinct().count();
+    private void print(int[][] worker) {
+        System.out.printf("[%c/%2d] [%c/%2d] [%c/%2d] [%c/%2d] [%c/%2d]\n", (char) worker[0][0], worker[0][1], (char) worker[1][0], worker[1][1], (char) worker[2][0], worker[2][1],
+                          (char) worker[3][0], worker[3][1], (char) worker[4][0], worker[4][1]);
+    }
 
-        this.adj = new int[this.countNodes][this.countNodes];
-
-        this.nodes = edges.stream().flatMap(Arrays::stream).collect(Collectors.toSet());
-
-        edges.stream().map(e -> new Integer[]{e[0] % this.countNodes, e[1] % this.countNodes}).forEach(edge -> this.adj[edge[0]][edge[1]] = 1);
-
+    private List<Character> getSequence() {
         final List<Character> output = new ArrayList<>();
 
         this.initAvailableNodes();
@@ -104,12 +112,12 @@ public class Advent7 {
     }
 
     private void initAvailableNodes() {
-        this.availableNodes = this.nodes.stream().filter(node -> {
+        this.availableNodes.addAll(this.nodes.stream().filter(node -> {
             int hasIncoming = 0;
             for (final Character source : this.nodes)
                 if (this.adj[source % this.countNodes][node % this.countNodes] > 0) hasIncoming++;
             return hasIncoming == 0;
-        }).sorted().collect(Collectors.toCollection(TreeSet::new));
+        }).collect(Collectors.toSet()));
     }
 
     private List<Character> follow(final Character node) {
@@ -118,8 +126,9 @@ public class Advent7 {
         this.doneNode.add(node);
         output.add(node);
 
-        for (final Character target : this.nodes)
-            if (this.adj[node % this.countNodes][target % this.countNodes] == 1 && this.checkNodeAvailable(target)) this.availableNodes.add(target);
+        this.nodes.stream()
+                  .filter(target -> this.adj[node % this.countNodes][target % this.countNodes] == 1 && this.checkNodeAvailable(target))
+                  .forEach(target -> this.availableNodes.add(target));
 
         //while (!next.isEmpty()) output.addAll(this.follow(next.pollFirst()));
 
@@ -127,9 +136,7 @@ public class Advent7 {
     }
 
     private boolean checkNodeAvailable(final Character node) {
-        for (final Character source : this.nodes)
-            if (this.adj[source % this.countNodes][node % this.countNodes] == 1 && !this.doneNode.contains(source)) return false;
-        return true;
+        return this.nodes.stream().noneMatch(source -> this.adj[source % this.countNodes][node % this.countNodes] == 1 && !this.doneNode.contains(source));
     }
 
 
