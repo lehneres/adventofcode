@@ -8,36 +8,40 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Advent4 {
+@SuppressWarnings("UtilityClass")
+public final class Advent4 {
 
-    public static void main(String[] args) throws IOException {
+    private static final int DAYSECONDS  = 86400;
+    private static final int HOURSECONDS = 60;
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        Pattern          r   = Pattern.compile("\\[(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2})\\] (.+#(\\d{1,4})|.+)");
+    @SuppressWarnings({"OverlyComplexMethod", "OverlyLongMethod"})
+    public static void main(final String... args) throws IOException {
 
-        long[][] obs = Files.lines(Paths.get("src/main/resources/advent4.txt")).map(s -> {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        final Pattern          r   = Pattern.compile("\\[(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2})\\] (.+#(\\d{1,4})|.+)");
+
+        final long[][] obs = Files.lines(Paths.get("src/main/resources/advent4.txt")).map(s -> {
             long[] entry = new long[3];
             try {
-                Matcher m = r.matcher(s);
-                if (m.find()) {
-                    entry[0] = (sdf.parse(m.group(1)).getTime());
+                Matcher matcher = r.matcher(s);
+                if (matcher.find()) {
+                    entry[0] = (sdf.parse(matcher.group(1)).getTime());
 
-                    if (m.group(3) != null) {
+                    if (matcher.group(3) != null) {
                         entry[1] = 1;
-                        entry[2] = Integer.parseInt(m.group(3));
+                        entry[2] = Integer.parseInt(matcher.group(3));
                     } else {
-                        entry[1] = m.group(2).contains("wakes up") ? 1 : 0;
+                        entry[1] = matcher.group(2).contains("wakes up") ? 1 : 0;
                         entry[2] = -1;
                     }
                 }
             } catch (ParseException e) {
                 System.err.println("could not parse string");
-                e.printStackTrace();
             }
             return entry;
         }).sorted(Comparator.comparing(a -> a[0])).toArray(size -> new long[size][3]);
 
-        Map<Long, int[]> minutesMap = new HashMap<>();
+        final Map<Long, int[]> minutesMap = new HashMap<>();
 
         long onDuty = -1;
         for (int i = 0; i < obs.length; i++) {
@@ -47,35 +51,36 @@ public class Advent4 {
 
             if (i > 0 && obs[i - 1][1] == 0 && obs[i][1] == 1 && obs[i - 1][2] == obs[i][2]) {
 
-                int[] minutes;
-                if (!minutesMap.containsKey(obs[i][2])) minutesMap.put(obs[i][2], new int[60]);
+                final int[] minutes;
+                if (!minutesMap.containsKey(obs[i][2])) minutesMap.put(obs[i][2], new int[Advent4.HOURSECONDS]);
                 minutes = minutesMap.get(obs[i][2]);
-                for (int m = (int) (60 + ((obs[i - 1][0] / 1000) % 86400) / 60); m <= (int) (60 + ((obs[i][0] / 1000) % 86400) / 60) - 1; m++)
+                for (int m = (int) (Advent4.HOURSECONDS + ((obs[i - 1][0] / 1000) % Advent4.DAYSECONDS) / Advent4.HOURSECONDS);
+                     m <= (int) (Advent4.HOURSECONDS + ((obs[i][0] / 1000) % Advent4.DAYSECONDS) / Advent4.HOURSECONDS) - 1; m++)
                     minutes[m]++;
             }
         }
 
-        Map<Long, Long> guardSleepTimeSummary = minutesMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (long) Arrays.stream(e.getValue()).sum()));
-        long            sleepiestGuard        = Collections.max(guardSleepTimeSummary.entrySet(), Comparator.comparingLong(Map.Entry::getValue)).getKey();
-        int             sleepyMinute          = findMaxArrayIndex(minutesMap.get(sleepiestGuard));
+        final Map<Long, Long> sleepTimeSummary = minutesMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> (long) Arrays.stream(e.getValue()).sum()));
+        final long            sleepiestGuard   = Collections.max(sleepTimeSummary.entrySet(), Comparator.comparingLong(Map.Entry::getValue)).getKey();
+        final int             sleepyMinute     = Advent4.findMaxArrayIndex(minutesMap.get(sleepiestGuard));
 
         System.out.println(sleepyMinute * sleepiestGuard);
 
-        int sleepiesMinute2 = -1, sleepTime = -1, sleepiestGuard2 = -1;
+        int sleepiestMinute2 = -1, sleepTime = -1, sleepiestGuard2 = -1;
 
-        for (long guard : minutesMap.keySet()) {
-            int sleepiesMinute = findMaxArrayIndex(minutesMap.get(guard));
+        for (final long guard : minutesMap.keySet()) {
+            final int sleepiesMinute = Advent4.findMaxArrayIndex(minutesMap.get(guard));
             if (sleepTime < minutesMap.get(guard)[sleepiesMinute]) {
                 sleepTime = minutesMap.get(guard)[sleepiesMinute];
-                sleepiesMinute2 = sleepiesMinute;
+                sleepiestMinute2 = sleepiesMinute;
                 sleepiestGuard2 = (int) guard;
             }
         }
 
-        System.out.println(sleepiestGuard2 * sleepiesMinute2);
+        System.out.println(sleepiestGuard2 * sleepiestMinute2);
     }
 
-    private static int findMaxArrayIndex(int[] array) {
+    private static int findMaxArrayIndex(final int[] array) {
         int maxIndex = 0;
         for (int i = 0; i < array.length; i++)
             if (array[maxIndex] < array[i]) maxIndex = i;

@@ -11,10 +11,12 @@ public final class Advent2 {
 
     public static void main(final String... args) throws IOException {
 
-        final int[] cCount = new int[2]; final Set<String> boxIds = Files.lines(Paths.get("src/main/resources/advent2.txt")).collect(Collectors.toSet());
+        final int[]       cCount = new int[2];
+        final Set<String> boxIds = Files.lines(Paths.get("src/main/resources/advent2.txt")).collect(Collectors.toSet());
 
         boxIds.forEach(boxId -> {
-            final int[] localCount = new int[26]; boxId.chars().forEach(i -> localCount[(i - 'a')]++);
+            final int[] localCount = new int[26];
+            boxId.chars().forEach(i -> localCount[(i - 'a')]++);
             Arrays.stream(localCount).filter(i -> i == 2 || i == 3).distinct().forEach(i -> cCount[i - 2]++);
         });
 
@@ -26,7 +28,9 @@ public final class Advent2 {
         for (final String boxId1 : boxIds)
             for (final String boxId2 : boxIds)
                 if (Advent2.HammingDistance(boxId1, boxId2) == 1) {
-                    boxes[0] = boxId1; boxes[1] = boxId2; break outer;
+                    boxes[0] = boxId1;
+                    boxes[1] = boxId2;
+                    break outer;
                 }
 
         System.out.println((IntStream.range(0, boxes[0].length())
