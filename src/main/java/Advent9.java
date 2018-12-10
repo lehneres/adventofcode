@@ -1,10 +1,11 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("UtilityClass")
 public final class Advent9 {
@@ -27,58 +28,47 @@ public final class Advent9 {
             maxMarble = Integer.parseInt(matcher.group(2));
         }
 
-        System.out.println(Arrays.stream(Advent9.playMarble(players, maxMarble)).max().getAsInt());
-        System.out.println(Arrays.stream(Advent9.playMarble(players, maxMarble * 100)).max().getAsInt());
+        System.out.println(Arrays.stream(Advent9.playMarble(players, maxMarble)).max().getAsLong());
+        System.out.println(Arrays.stream(Advent9.playMarble(players, maxMarble * 100)).max().getAsLong());
     }
 
-    private static int[] playMarble(final int players, final int maxMarble) {
-        final Advent9.CircularArrayList<Integer> circle = new Advent9.CircularArrayList<>(0);
+    private static long[] playMarble(final int players, final int maxMarble) {
+        final Advent9.CircleDeque<Integer> circle = new Advent9.CircleDeque<>(maxMarble);
 
         circle.add(0);
 
         int currentPlayer = 1;
-        int currentMarble = 0;
         int lastMarble    = 0;
 
-        final int[] scores = new int[players];
+        final long[] scores = new long[players];
 
         while (lastMarble + 1 < maxMarble) {
             if ((lastMarble + 1) % Advent9.MAGICNUMBER == 0) {
-                scores[currentPlayer] += (lastMarble + 1) + circle.get(currentMarble - 7);
+                circle.rotate(-7);
+                scores[currentPlayer] += (lastMarble + 1) + circle.pop();
 
-                circle.remove(currentMarble - 7);
-                currentMarble -= 7;
-            } else currentMarble = circle.addCircular(currentMarble + 2, lastMarble + 1);
+            } else {
+                circle.rotate(2);
+                circle.addLast(lastMarble + 1);
+            }
             currentPlayer = ++currentPlayer % players;
             lastMarble++;
 
-            if ((lastMarble + 1) % 100000 == 0) System.out.println(lastMarble + 1);
+            //if (lastMarble % 100000 == 0) System.out.println(lastMarble);
         }
 
         return scores;
     }
 
-    static class CircularArrayList<E> extends ArrayList<E> {
-        CircularArrayList(final int maxMarble) {
+    static class CircleDeque<T> extends ArrayDeque<T> {
+        CircleDeque(final int maxMarble) {
             super(maxMarble);
         }
 
-        @SuppressWarnings("NonBooleanMethodNameMayNotStartWithQuestion")
-        int addCircular(final int index, final E element) {
-            final int circularIndex = this.size() == 1 ? 1 : Math.floorMod(index, this.size());
-            this.add(circularIndex, element);
-            return circularIndex;
-        }
-
-        @Override
-        public E remove(final int index) {
-            return super.remove(Math.floorMod(index, this.size()));
-        }
-
-        @Override
-        public E get(final int index) {
-            return super.get(Math.floorMod(index, this.size()));
+        void rotate(final int num) {
+            if (num == 0) return;
+            if (num > 0) IntStream.range(0, num).mapToObj(i -> this.removeLast()).forEach(this::addFirst);
+            else IntStream.range(0, Math.abs(num) - 1).mapToObj(i -> this.remove()).forEach(this::addLast);
         }
     }
-
 }
