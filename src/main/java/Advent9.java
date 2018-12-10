@@ -61,9 +61,7 @@ public final class Advent9 {
     }
 
     static class CircleDeque<T> extends ArrayDeque<T> {
-        CircleDeque(final int maxMarble) {
-            super(maxMarble);
-        }
+        CircleDeque(final int maxMarble) { super(maxMarble); }
 
         void rotate(final int num) {
             if (num == 0) return;
