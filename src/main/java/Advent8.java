@@ -19,7 +19,7 @@ final class Advent8 {
 
         final Advent8.Node tree = Advent8.getTree(input);
 
-        final Stack<Advent8.Node> nodes = new Stack<>() {{ this.add(tree); }};
+        final Stack<Advent8.Node> nodes = new Stack<Node>() {{ this.add(tree); }};
 
         int countMetaData = 0;
 
