@@ -22,8 +22,7 @@ public final class Advent13 {
     private static final int CART_UP         = '^';
     private static final int CART_DOWN       = 'v';
 
-    private final List<String> lines = Files.lines(Paths.get("src/main/resources/advent13.txt")).collect(Collectors.toList());
-
+    private final List<String>       lines = Files.lines(Paths.get("src/main/resources/advent13.txt")).collect(Collectors.toList());
     private final int[][]            track = new int[this.lines.size()][];
     private final Set<Advent13.Cart> carts = new TreeSet<>();
 
@@ -39,20 +38,16 @@ public final class Advent13 {
         do advent.update(); while (advent.carts.stream().noneMatch(Advent13.Cart::isCrashed));
 
         final Advent13.Cart crashedCart = advent.carts.stream().filter(Advent13.Cart::isCrashed).findAny().get();
-
         System.out.printf("first crash location: (%3d,%3d)\n", crashedCart.getCol(), crashedCart.getRow());
 
         do advent.update(); while (advent.carts.stream().filter(cart -> !cart.isCrashed()).count() > 1);
 
-        final Advent13.Cart lastCart = (Advent13.Cart) advent.carts.stream().filter(cart -> !cart.isCrashed()).toArray()[0];
+        final Advent13.Cart lastCart = advent.carts.stream().filter(cart -> !cart.isCrashed()).findAny().get();
         System.out.printf("last cart location:   (%3d,%3d)", lastCart.getCol(), lastCart.getRow());
     }
 
     private List<Advent13.Cart> getOptionalCrashedCarts(final int[] coord) {
-        return this.carts.stream()
-                         .filter(cart -> !cart.isCrashed())
-                         .filter(cart -> cart.equals(new Advent13.Cart(coord[0], coord[1], (char) Advent13.CART_UP)))
-                         .collect(Collectors.toList());
+        return this.carts.stream().filter(cart -> !cart.isCrashed()).filter(cart -> cart.equals(new Advent13.Cart(coord[0], coord[1]))).collect(Collectors.toList());
     }
 
     private void print() {
@@ -120,6 +115,12 @@ public final class Advent13 {
         private       int     direction;
         private       boolean crashed;
 
+        Cart(final int row, final int col) {
+            this.id = String.valueOf(row) + col;
+            this.row = row;
+            this.col = col;
+        }
+
         Cart(final int row, final int col, final char direction) {
             this.id = String.valueOf(row) + col;
             this.row = row;
@@ -137,22 +138,9 @@ public final class Advent13 {
         }
 
         private void updateDirection(final int next) {
-            switch (next) {
-                case Advent13.CURVE_SLASH:
-                    this.setDirectionAsInt(this.direction % 2 == 0 ? this.direction + 1 : this.direction - 1);
-                    break;
-                case Advent13.CURVE_BACKSLASH:
-                    this.setDirectionAsInt(this.direction % 2 == 0 ? this.direction - 1 : this.direction + 1);
-                    break;
-                case Advent13.INTERSECTION:
-                    this.setDirectionAsInt(this.direction + this.change[this.pointer++ % this.change.length]);
-                    break;
-                case Advent13.VERTICAL:
-                case Advent13.HORIZONTAL:
-                    break;
-                default:
-                    System.err.println("invalid state");
-            }
+            if (next == Advent13.CURVE_SLASH) this.setDirectionAsInt(this.direction % 2 == 0 ? this.direction + 1 : this.direction - 1);
+            else if (next == Advent13.CURVE_BACKSLASH) this.setDirectionAsInt(this.direction % 2 == 0 ? this.direction - 1 : this.direction + 1);
+            else if (next == Advent13.INTERSECTION) this.setDirectionAsInt(this.direction + this.change[this.pointer++ % this.change.length]);
         }
 
         @Override
@@ -173,38 +161,19 @@ public final class Advent13 {
         }
 
         char getDirection() {
-            switch (this.direction) {
-                case 0:
-                    return Advent13.CART_UP;
-                case 1:
-                    return Advent13.CART_RIGHT;
-                case 2:
-                    return Advent13.CART_DOWN;
-                case 3:
-                    return Advent13.CART_LEFT;
-                default:
-                    System.err.println("invalid state");
-                    return '!';
-            }
+            if (this.direction == 0) return Advent13.CART_UP;
+            else if (this.direction == 1) return Advent13.CART_RIGHT;
+            else if (this.direction == 2) return Advent13.CART_DOWN;
+            else if (this.direction == 3) return Advent13.CART_LEFT;
+            System.err.println("invalid state");
+            return '!';
         }
 
         void setDirectionAsChar(final char direction) {
-            switch (direction) {
-                case Advent13.CART_UP:
-                    this.direction = 0;
-                    break;
-                case Advent13.CART_RIGHT:
-                    this.direction = 1;
-                    break;
-                case Advent13.CART_DOWN:
-                    this.direction = 2;
-                    break;
-                case Advent13.CART_LEFT:
-                    this.direction = 3;
-                    break;
-                default:
-                    System.err.println("invalid state");
-            }
+            if (direction == Advent13.CART_UP) this.direction = 0;
+            else if (direction == Advent13.CART_RIGHT) this.direction = 1;
+            else if (direction == Advent13.CART_DOWN) this.direction = 2;
+            else if (direction == Advent13.CART_LEFT) this.direction = 3;
         }
 
         private void setDirectionAsInt(final int direction) {
@@ -215,16 +184,8 @@ public final class Advent13 {
             return this.col;
         }
 
-        public void setCol(final int col) {
-            this.col = col;
-        }
-
         int getRow() {
             return this.row;
-        }
-
-        public void setRow(final int row) {
-            this.row = row;
         }
 
         String getId() {
@@ -245,10 +206,6 @@ public final class Advent13 {
 
         boolean isCrashed() {
             return this.crashed;
-        }
-
-        public void setCrashed(final boolean crashed) {
-            this.crashed = crashed;
         }
     }
 }
