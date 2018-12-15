@@ -2,19 +2,23 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("UtilityClass")
 public final class Advent12 {
 
     private static final int    HASH         = 35;
-    private static final int    GENERATIONS  = 20;
+    private static final long   GENERATIONS  = 50000000000L;
     private static final String initialState = "#...#..##.......####.#..###..#.##..########.#.#...#.#...###.#..###.###.#.#..#...#.#..##..#######.##";
 
+    @SuppressWarnings("OverlyLongMethod")
     public static void main(final String[] args) throws IOException {
         final Pattern r = Pattern.compile("([\\.#])([\\.#])([\\.#])([\\.#])([\\.#]) => ([\\.#])");
 
@@ -34,40 +38,70 @@ public final class Advent12 {
             return rule;
         }).collect(Collectors.toSet());
 
-        char[] pots = new char[(Advent12.initialState.length() + Advent12.GENERATIONS) * 2 - 1];
-        Arrays.fill(pots, '.');
+        final int cappedGenerations = (int) Math.min(10000, Advent12.GENERATIONS);
 
-        for (int i = 0; i < Advent12.initialState.length(); i++)
-            pots[i + Advent12.initialState.length() - 1] = Advent12.initialState.charAt(i);
-        System.out.println(CharBuffer.wrap(pots).chars().mapToObj(Character::toString).collect(Collectors.joining()));
+        final List<int[]> generations = new ArrayList<>();
 
+        final int initialLength = Advent12.initialState.length();
+        char[]    curGen        = new char[(initialLength + cappedGenerations) * 2 - 1];
+        Arrays.fill(curGen, '.');
 
-        pots = Advent12.computeGenerations(rules, pots);
+        for (int i = 0; i < initialLength; i++)
+            curGen[i + initialLength - 1] = Advent12.initialState.charAt(i);
 
-        int indexSum = 0;
-        for (int i = 0; i < pots.length; i++)
-            if (pots[i] == Advent12.HASH) indexSum += -Advent12.initialState.length() + 1 + i;
+        generations.add(CharBuffer.wrap(curGen).chars().toArray());
 
-        System.out.println(indexSum);
-    }
-
-    private static char[] computeGenerations(final Set<Advent12.Rule> rules, final char[] pots) {
-        char[] curGen = pots;
-        for (int g = 0; g < Advent12.GENERATIONS; g++) {
+        int lastDiff = 0;
+        for (int g = 0; g < cappedGenerations; g++) {
             final char[] nextGen = new char[curGen.length];
             Arrays.fill(nextGen, '.');
 
-            for (int i = 0; i < (Advent12.initialState.length() + Advent12.GENERATIONS) - 2; i++) {
-                final int leftIndex  = Advent12.initialState.length() + Advent12.GENERATIONS - 1 - i;
-                final int rightIndex = Advent12.initialState.length() + Advent12.GENERATIONS - 1 + i;
-                Advent12.applyRules(rules, curGen, nextGen, leftIndex);
-                Advent12.applyRules(rules, curGen, nextGen, rightIndex);
+            for (int i = 0; i < (initialLength + cappedGenerations) - 2; i++) {
+                Advent12.applyRules(rules, curGen, nextGen, initialLength + cappedGenerations - 1 - i);
+                Advent12.applyRules(rules, curGen, nextGen, initialLength + cappedGenerations - 1 + i);
             }
 
+            generations.add(CharBuffer.wrap(nextGen).chars().toArray());
+
+            final int diff = Advent12.getIndexSum(CharBuffer.wrap(nextGen).chars().toArray()) - Advent12.getIndexSum(CharBuffer.wrap(curGen).chars().toArray());
+            if (diff == lastDiff) break;
+            else lastDiff = diff;
+
             curGen = nextGen;
-            System.out.println(CharBuffer.wrap(curGen).chars().mapToObj(Character::toString).collect(Collectors.joining()));
         }
-        return curGen;
+
+        Advent12.printGenerations(generations);
+
+        if (generations.size() == cappedGenerations) System.err.println("did not meet exit condition");
+
+        final long skipped      = Math.max(0, Advent12.GENERATIONS - generations.size());
+        final int  lastIndexSum = Advent12.getIndexSum(generations.get(generations.size() - 1));
+
+        System.out.format("final index sum: %d\n", lastIndexSum + lastDiff * (skipped + 1));
+
+    }
+
+    private static void printGenerations(final List<int[]> generations) {
+        int minI = Integer.MAX_VALUE, maxI = Integer.MIN_VALUE;
+        for (final int[] g : generations)
+            for (int i = 0; i < g.length; i++)
+                if (g[i] == Advent12.HASH && i < minI) minI = i;
+                else if (g[i] == Advent12.HASH && i > maxI) maxI = i;
+
+        int prevIndexSum = 0;
+        for (int g = 0; g < generations.size(); g++) {
+            final int[] curGen   = generations.get(g);
+            final int   indexSum = Advent12.getIndexSum(curGen);
+            System.out.printf("#%3d: %5d (%3d)   ", g, indexSum, indexSum - prevIndexSum);
+            prevIndexSum = indexSum;
+            for (int i = minI; i <= maxI; i++)
+                System.out.print((char) curGen[i]);
+            System.out.println();
+        }
+    }
+
+    private static int getIndexSum(final int[] pots) {
+        return IntStream.range(0, pots.length).filter(i -> pots[i] == Advent12.HASH).map(i -> -Advent12.initialState.length() + 1 + i).sum();
     }
 
     private static void applyRules(final Set<? extends Advent12.Rule> rules, final char[] prevGen, final char[] nextGen, final int i) {
