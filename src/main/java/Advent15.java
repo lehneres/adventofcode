@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Advent15 {
 
@@ -18,7 +19,9 @@ public class Advent15 {
 
         battle.readGridFromFile("src/main/resources/advent15.txt");
 
-        while (battle.hasNextRound()) ;
+        battle.play(false, Integer.MAX_VALUE);
+
+        System.out.println(battle.getOutcome());
     }
 
     private static List<Advent15.Point> constructPath(final Map<Advent15.Point, ? extends Advent15.Point> trace, Advent15.Point target) {
@@ -32,7 +35,16 @@ public class Advent15 {
         return path;
     }
 
-    boolean hasNextRound() {
+    String getOutcome() {
+        final int sum = this.agents.values().stream().filter(agent -> !agent.isDead()).mapToInt(Advent15.Agent::getHitpoints).sum();
+        return String.format("the outcome is %d * %d = %d", this.currentRound, sum, sum * this.currentRound);
+    }
+
+    void play(@SuppressWarnings("SameParameterValue") final boolean print, int maxRounds) {
+        while (maxRounds-- > 0 && this.hasNextRound()) if (print) this.print();
+    }
+
+    private boolean hasNextRound() {
         final List<Advent15.Point> candidates = new ArrayList<>();
         for (int row = 0; row < this.grid.length; row++)
             for (int col = 0; col < this.grid[row].length; col++)
@@ -45,15 +57,22 @@ public class Advent15 {
 
         final Set<Advent15.Point> enemies = new HashSet<>();
 
-        for (int row = 0; row < this.grid.length; row++)
-            for (int col = 0; col < this.grid[row].length; col++)
-                if (this.grid[row][col] == enemyFlag) enemies.add(new Advent15.Point(row, col));
+        // check if turn starts with enemy in reach
+        if (this.checkAndAttack(origin, enemyFlag)) return true;
 
+        // no enemy in reach, moving
+        final List<Advent15.Agent> enemies = this.agents.values()
+                                                        .stream()
+                                                        .filter(agent -> !agent.isDead())
+                                                        .filter(agent -> agent.getType() == enemyFlag)
+                                                        .collect(Collectors.toList());
+
+        // no enemy left
         if (enemies.isEmpty()) return false;
 
-        final Set<Advent15.Point> targetSquares = new HashSet<>();
-
-        for (final Advent15.Point enemy : enemies) {
+        // find target squares adjacent to enemy
+        final List<Advent15.Point> targetSquares = new ArrayList<>();
+        enemies.forEach(enemy -> {
             final int col = enemy.getCol();
             final int row = enemy.getRow();
 
@@ -65,18 +84,43 @@ public class Advent15 {
 
         if (targetSquares.isEmpty()) return false;
 
-        for (final Advent15.Point enemy : enemies) {
-            final int col = enemy.getCol();
-            final int row = enemy.getRow();
+        // check if agent has enemy in reach after moving
+        this.checkAndAttack(origin, enemyFlag);
+        return true;
+    }
 
-            if (row - 1 == origin.getRow() && col == origin.getCol()) return this.attack(origin);
-            if (row + 1 == origin.getRow() && col == origin.getCol()) return this.attack(origin);
-            if (row == origin.getRow() && col - 1 == origin.getCol()) return this.attack(origin);
-            if (row == origin.getRow() && col + 1 == origin.getCol()) return this.attack(origin);
+    private boolean checkAndAttack(final Advent15.Point origin, final char enemyFlag) {
+        final List<Advent15.Agent> enemiesInDirectReach = this.enemiesInDirectReach(origin, enemyFlag);
+
+        if (!enemiesInDirectReach.isEmpty()) {
+            final int minHitPoints = enemiesInDirectReach.stream().mapToInt(Advent15.Agent::getHitpoints).min().getAsInt();
+
+            final Advent15.Agent bestTarget = enemiesInDirectReach.stream().filter(a -> minHitPoints == a.getHitpoints()).min((a1, a2) -> {
+                final int rowDiff = a1.getRow() - a2.getRow();
+                if (rowDiff != 0) return rowDiff;
+                return a1.getCol() - a2.getCol();
+            }).get();
+
+            bestTarget.reduceHitpoints(this.agents.get(this.grid[origin.getRow()][origin.getCol()]).getAttackPower());
+
+            if (bestTarget.isDead()) this.grid[bestTarget.getRow()][bestTarget.getCol()] = Advent15.EMPTY;
+            return true;
         }
 
+        return false;
+    }
 
-        return this.hasMove(origin, targetSquares);
+    private List<Advent15.Agent> enemiesInDirectReach(final Advent15.Point origin, final char enemyFlag) {
+        final int col = origin.getCol();
+        final int row = origin.getRow();
+
+        final List<Advent15.Agent> targets = new ArrayList<>();
+        if (this.grid[row - 1][col] % enemyFlag == 0) targets.add(this.agents.get(this.grid[row - 1][col]));
+        if (this.grid[row][col - 1] % enemyFlag == 0) targets.add(this.agents.get(this.grid[row][col - 1]));
+        if (this.grid[row + 1][col] % enemyFlag == 0) targets.add(this.agents.get(this.grid[row + 1][col]));
+        if (this.grid[row][col + 1] % enemyFlag == 0) targets.add(this.agents.get(this.grid[row][col + 1]));
+
+        return targets;
     }
 
     private boolean hasMove(final Advent15.Point origin, final Set<Advent15.Point> targetSquares) {
@@ -92,7 +136,7 @@ public class Advent15 {
                                                               })
                                                               .collect(Collectors.toList());
 
-        if (paths.isEmpty()) return false;
+        if (paths.isEmpty()) return origin;
 
         final Advent15.Point next = paths.get(0).get(1);
 
@@ -179,8 +223,8 @@ public class Advent15 {
     }
 
     private static class Point implements Comparable<Advent15.Point> {
-        private final int col;
-        private final int row;
+        private int row;
+        private int col;
 
         Point(final int row, final int col) {
             this.col = col;
@@ -201,8 +245,16 @@ public class Advent15 {
             return this.row;
         }
 
+        private void setRow(final int row) {
+            this.row = row;
+        }
+
         int getCol() {
             return this.col;
+        }
+
+        private void setCol(final int col) {
+            this.col = col;
         }
 
         @Override
@@ -210,6 +262,7 @@ public class Advent15 {
             return Objects.hash(this.col, this.row);
         }
 
+        @SuppressWarnings("CompareToUsesNonFinalVariable")
         @Override
         public int compareTo(final @NotNull Advent15.Point o) {
             final int rowDiff = this.row - o.row;
