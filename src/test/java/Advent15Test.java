@@ -30,7 +30,9 @@ class Advent15Test {
 
         battle.readGridFromFile("src/test/resources/advent15_SmallTest_Movement.txt");
 
+        battle.print();
         battle.hasNextRound();
+        battle.print();
 
         assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_SmallTest_Movement_Result.txt")), "result is not equal");
     }

@@ -104,7 +104,7 @@ public class Advent15 {
 
     private List<Advent15.Point> findPath(final Advent15.Point start, final Advent15.Point target) {
         final Set<Advent15.Point>                 closedSet = new HashSet<>();
-        final Set<Advent15.Point>                 openSet   = new HashSet<>();
+        final List<Advent15.Point>                openSet   = new ArrayList<>();
         final Map<Advent15.Point, Advent15.Point> trace     = new HashMap<>();
         final Map<Advent15.Point, Integer>        gScore    = new HashMap<>();
 
@@ -223,9 +223,7 @@ public class Advent15 {
         }
 
         int getClockWisePosition(final Advent15.Point o) {
-            final int rowDiff = this.row - o.row;
-            if (rowDiff != 0) return rowDiff;
-            return this.col - o.col;
+            return this.compareTo(o);
         }
     }
 }
