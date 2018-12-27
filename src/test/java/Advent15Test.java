@@ -26,7 +26,7 @@ class Advent15Test {
     }
 
     @Test
-    void testBasicMovement() throws IOException {
+    void testBasicMovement() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_SmallTest_Movement.txt");
@@ -37,7 +37,7 @@ class Advent15Test {
     }
 
     @Test
-    void testMovement() throws IOException {
+    void testMovement() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Movement.txt");
@@ -48,7 +48,7 @@ class Advent15Test {
     }
 
     @Test
-    void testAttack1() throws IOException {
+    void testAttack1() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Attack.txt");
@@ -63,7 +63,7 @@ class Advent15Test {
     }
 
     @Test
-    void testAttack2() throws IOException {
+    void testAttack2() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Attack2.txt");
@@ -78,7 +78,7 @@ class Advent15Test {
     }
 
     @Test
-    void testAttack3() throws IOException {
+    void testAttack3() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Attack3.txt");
@@ -93,7 +93,7 @@ class Advent15Test {
     }
 
     @Test
-    void testAttack4() throws IOException {
+    void testAttack4() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Attack4.txt");
@@ -108,7 +108,7 @@ class Advent15Test {
     }
 
     @Test
-    void testAttack5() throws IOException {
+    void testAttack5() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Attack5.txt");
@@ -123,7 +123,7 @@ class Advent15Test {
     }
 
     @Test
-    void testAttack6() throws IOException {
+    void testAttack6() throws Exception {
         final Advent15 battle = new Advent15();
 
         battle.readGridFromFile("src/test/resources/advent15_Test_Attack6.txt");

@@ -13,19 +13,36 @@ public class Advent15 {
     private static final char                         GOBLIN            = 'G'; //71
     private static final char                         EMPTY             = '.';
     private static final int                          INITIAL_HITPOINTS = 200;
-    private static final int                          ATTACK_POWER      = 3;
+    private static final int                          goblinAttackPower = 3;
+    private static       int                          elfAttackPower    = 3;
+    private static       boolean                      ignoreDeadElf     = true;
     private final        Map<Integer, Advent15.Agent> agents            = new HashMap<>();
     private              int[][]                      grid;
     private              int                          currentRound;
+    private              String                       sourceFile;
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException, Advent15.DeadElfException {
         final Advent15 battle = new Advent15();
-
         battle.readGridFromFile("src/main/resources/advent15.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
         System.out.println(battle.getOutcome());
+
+        battle.reset();
+
+        Advent15.ignoreDeadElf = false;
+
+        while (true) {
+            try {
+                battle.play(true, Integer.MAX_VALUE);
+                System.out.printf("%s with attack power: %d%n", battle.getOutcome(), Advent15.elfAttackPower);
+                break;
+            } catch (final Advent15.DeadElfException e) {
+                battle.reset();
+                Advent15.elfAttackPower++;
+            }
+        }
     }
 
     private static List<Advent15.Point> constructPath(final Map<Advent15.Point, ? extends Advent15.Point> trace, Advent15.Point target) {
@@ -39,16 +56,23 @@ public class Advent15 {
         return path;
     }
 
+    private void reset() throws IOException {
+        this.agents.clear();
+        this.currentRound = 0;
+        this.readGridFromFile(this.sourceFile);
+    }
+
     String getOutcome() {
         final int sum = this.agents.values().stream().filter(agent -> !agent.isDead()).mapToInt(Advent15.Agent::getHitpoints).sum();
         return String.format("the outcome is %d * %d = %d", this.currentRound, sum, sum * this.currentRound);
     }
 
-    void play(@SuppressWarnings("SameParameterValue") final boolean print, int maxRounds) {
+    void play(@SuppressWarnings("SameParameterValue") final boolean print, int maxRounds) throws Advent15.DeadElfException {
+        if (print) this.print();
         while (maxRounds-- > 0 && this.hasNextRound()) if (print) this.print();
     }
 
-    private boolean hasNextRound() {
+    private boolean hasNextRound() throws Advent15.DeadElfException {
         final List<Advent15.Agent> candidates = this.agents.values().stream().filter(Advent15.Agent::isAlive).sorted(Advent15.Point::compareTo).collect(Collectors.toList());
 
         boolean nextRound = false;
@@ -62,7 +86,7 @@ public class Advent15 {
         return nextRound;
     }
 
-    private boolean hasNextTurn(final Advent15.Agent agent) {
+    private boolean hasNextTurn(final Advent15.Agent agent) throws Advent15.DeadElfException {
         final char enemyFlag = agent.getType() % Advent15.ELF == 0 ? Advent15.GOBLIN : Advent15.ELF;
 
         // no enemy in reach, moving
@@ -103,7 +127,7 @@ public class Advent15 {
         return true;
     }
 
-    private boolean checkAndAttack(final Advent15.Agent agent, final Collection<Advent15.Agent> enemies) {
+    private boolean checkAndAttack(final Advent15.Agent agent, final Collection<Advent15.Agent> enemies) throws Advent15.DeadElfException {
         final int col = agent.getCol();
         final int row = agent.getRow();
 
@@ -116,7 +140,10 @@ public class Advent15 {
 
             bestTarget.reduceHitpoints(agent.getAttackPower());
 
-            if (bestTarget.isDead()) this.grid[bestTarget.getRow()][bestTarget.getCol()] = Advent15.EMPTY;
+            if (bestTarget.isDead()) {
+                if (bestTarget.getType() == Advent15.ELF && !Advent15.ignoreDeadElf) throw new Advent15.DeadElfException();
+                this.grid[bestTarget.getRow()][bestTarget.getCol()] = Advent15.EMPTY;
+            }
             return true;
         }
 
@@ -143,9 +170,9 @@ public class Advent15 {
         agent.setRow(next.getRow());
     }
 
-    private List<Advent15.Point> findPath(final Advent15.Point start, final Advent15.Point target) {
+    private List<Advent15.Point> findPath(final Advent15.Point origin, final Advent15.Point target) {
         final Set<Advent15.Point>                 closedSet = new HashSet<>();
-        final List<Advent15.Point>                openSet   = new ArrayList<>();
+        final Deque<Advent15.Point>               openSet   = new ArrayDeque<>();
         final Map<Advent15.Point, Advent15.Point> trace     = new HashMap<>();
         final Map<Advent15.Point, Integer>        gScore    = new HashMap<>();
 
@@ -153,35 +180,26 @@ public class Advent15 {
             for (int col = 0; col < this.grid[row].length; col++)
                 gScore.put(new Advent15.Point(row, col), Integer.MAX_VALUE);
 
-
-        final Map<Advent15.Point, Integer> fScore = new HashMap<>(gScore);
-
-        gScore.put(start, 0);
-        fScore.put(start, start.computeDistance(target));
-
-        openSet.add(start);
+        gScore.put(origin, 0);
+        openSet.add(origin);
 
         do {
-            final Advent15.Point current = openSet.stream().min(Comparator.comparing(fScore::get)).get();
+            final Advent15.Point current = openSet.pop();
             if (current.equals(target)) return Advent15.constructPath(trace, current);
 
-            openSet.remove(current);
             closedSet.add(current);
 
             final Advent15.Point[] candidates = {new Advent15.Point(current.getRow() - 1, current.getCol()), new Advent15.Point(current.getRow() + 1, current.getCol()),
                                                  new Advent15.Point(current.getRow(), current.getCol() - 1), new Advent15.Point(current.getRow(), current.getCol() + 1)};
 
             Arrays.stream(candidates)
-                  .filter(neighbor -> this.grid[neighbor.getRow()][neighbor.getCol()] == Advent15.EMPTY)
-                  .filter(neighbor -> !closedSet.contains(neighbor))
-                  .forEachOrdered(neighbor -> {
+                  .filter(neighbor -> this.grid[neighbor.getRow()][neighbor.getCol()] == Advent15.EMPTY).filter(neighbor -> !closedSet.contains(neighbor)).forEach(neighbor -> {
                       final int tScore = gScore.get(current) + 1;
                       if (!openSet.contains(neighbor)) openSet.add(neighbor);
                       else if (tScore > gScore.get(neighbor)) return;
                       else if (tScore == gScore.get(neighbor)) if (current.compareTo(neighbor) > 0) return;
                       trace.put(neighbor, current);
                       gScore.put(neighbor, tScore);
-                      fScore.put(neighbor, tScore + current.computeDistance(target));
                   });
         } while (!openSet.isEmpty());
 
@@ -190,6 +208,7 @@ public class Advent15 {
 
     void readGridFromFile(final String file) throws IOException {
         final List<String> lines = Files.lines(Paths.get(file)).collect(Collectors.toList());
+        this.sourceFile = file;
 
         this.grid = new int[lines.size()][];
         for (int row = 0; row < lines.size(); row++) {
@@ -214,16 +233,18 @@ public class Advent15 {
     }
 
     private void print() {
+        System.out.printf("Current round %d%n", this.currentRound);
         IntStream.range(0, this.grid.length).forEach(i -> {
             Arrays.stream(this.grid[i]).forEach(anInt -> {
-                if (anInt % Advent15.ELF == 0) System.out.printf("%c", Advent15.ELF);
-                else if (anInt % Advent15.GOBLIN == 0) System.out.printf("%c", Advent15.GOBLIN);
+                if (anInt % Advent15.ELF == 0) System.out.printf("\u001B[32m%c\u001B[0m", Advent15.ELF);
+                else if (anInt % Advent15.GOBLIN == 0) System.out.printf("\u001B[31m%c\u001B[0m", Advent15.GOBLIN);
                 else System.out.printf("%c", anInt);
             });
             System.out.print("     ");
             this.agents.values().stream().filter(a -> !a.isDead()).filter(a -> a.getRow() == i).sorted(Comparator.comparingInt(Advent15.Agent::getCol)).forEach(System.out::print);
             System.out.println();
         });
+        System.out.println();
     }
 
     int[][] getGrid() {
@@ -243,10 +264,6 @@ public class Advent15 {
         Point(final int row, final int col) {
             this.col = col;
             this.row = row;
-        }
-
-        int computeDistance(final Advent15.Point otherPoint) {
-            return Math.abs(this.col - otherPoint.col) + Math.abs(this.row - otherPoint.row);
         }
 
         @Override
@@ -293,12 +310,13 @@ public class Advent15 {
     private static class Agent extends Advent15.Point {
 
         private final char type;
-        private final int  attackPower = Advent15.ATTACK_POWER;
-        private       int  hitpoints   = Advent15.INITIAL_HITPOINTS;
+        private final int  attackPower;
+        private       int  hitpoints = Advent15.INITIAL_HITPOINTS;
 
         Agent(final char type, final int row, final int col) {
             super(row, col);
             this.type = type;
+            this.attackPower = this.type == Advent15.ELF ? Advent15.elfAttackPower : Advent15.goblinAttackPower;
         }
 
         @SuppressWarnings("CompareToUsesNonFinalVariable")
@@ -345,4 +363,6 @@ public class Advent15 {
             super.setRow(row);
         }
     }
+
+    static class DeadElfException extends Exception {}
 }
