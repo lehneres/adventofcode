@@ -9,17 +9,17 @@ import java.util.stream.IntStream;
 
 public class Advent15 {
 
-    private static final char                         ELF               = 'E'; //69
-    private static final char                         GOBLIN            = 'G'; //71
-    private static final char                         EMPTY             = '.';
-    private static final int                          INITIAL_HITPOINTS = 200;
-    private static final int                          goblinAttackPower = 3;
-    private static       int                          elfAttackPower    = 3;
-    private static       boolean                      ignoreDeadElf     = true;
-    private final        Map<Integer, Advent15.Agent> agents            = new HashMap<>();
-    private              int[][]                      grid;
-    private              int                          currentRound;
-    private              String                       sourceFile;
+    private static final char                ELF               = 'E'; //69
+    private static final char                GOBLIN            = 'G'; //71
+    private static final char                EMPTY             = '.';
+    private static final int                 INITIAL_HITPOINTS = 200;
+    private static final int                 goblinAttackPower = 3;
+    private static       int                 elfAttackPower    = 3;
+    private static       boolean             ignoreDeadElf     = true;
+    private final        Set<Advent15.Agent> agents            = new HashSet<>();
+    private              int[][]             grid;
+    private              int                 currentRound;
+    private              String              sourceFile;
 
     public static void main(final String[] args) throws IOException, Advent15.DeadElfException {
         final Advent15 battle = new Advent15();
@@ -35,7 +35,7 @@ public class Advent15 {
 
         while (true) {
             try {
-                battle.play(true, Integer.MAX_VALUE);
+                battle.play(false, Integer.MAX_VALUE);
                 System.out.printf("%s with attack power: %d%n", battle.getOutcome(), Advent15.elfAttackPower);
                 break;
             } catch (final Advent15.DeadElfException e) {
@@ -63,7 +63,7 @@ public class Advent15 {
     }
 
     String getOutcome() {
-        final int sum = this.agents.values().stream().filter(agent -> !agent.isDead()).mapToInt(Advent15.Agent::getHitpoints).sum();
+        final int sum = this.agents.stream().filter(Advent15.Agent::isAlive).mapToInt(Advent15.Agent::getHitpoints).sum();
         return String.format("the outcome is %d * %d = %d", this.currentRound, sum, sum * this.currentRound);
     }
 
@@ -73,7 +73,7 @@ public class Advent15 {
     }
 
     private boolean hasNextRound() throws Advent15.DeadElfException {
-        final List<Advent15.Agent> candidates = this.agents.values().stream().filter(Advent15.Agent::isAlive).sorted(Advent15.Point::compareTo).collect(Collectors.toList());
+        final List<Advent15.Agent> candidates = this.agents.stream().filter(Advent15.Agent::isAlive).sorted(Advent15.Point::compareTo).collect(Collectors.toList());
 
         boolean nextRound = false;
         for (final Advent15.Agent candidate : candidates) {
@@ -90,8 +90,7 @@ public class Advent15 {
         final char enemyFlag = agent.getType() % Advent15.ELF == 0 ? Advent15.GOBLIN : Advent15.ELF;
 
         // no enemy in reach, moving
-        final Collection<Advent15.Agent> enemies = this.agents.values()
-                                                              .stream()
+        final Collection<Advent15.Agent> enemies = this.agents.stream()
                                                               .filter(Advent15.Agent::isAlive)
                                                               .filter(a -> a.getType() == enemyFlag)
                                                               .sorted(Advent15.Agent::compareTo)
@@ -140,10 +139,7 @@ public class Advent15 {
 
             bestTarget.reduceHitpoints(agent.getAttackPower());
 
-            if (bestTarget.isDead()) {
-                if (bestTarget.getType() == Advent15.ELF && !Advent15.ignoreDeadElf) throw new Advent15.DeadElfException();
-                this.grid[bestTarget.getRow()][bestTarget.getCol()] = Advent15.EMPTY;
-            }
+            if (bestTarget.isDead()) this.grid[bestTarget.getRow()][bestTarget.getCol()] = Advent15.EMPTY;
             return true;
         }
 
@@ -151,7 +147,10 @@ public class Advent15 {
     }
 
     private void move(final Advent15.Agent agent, final List<Advent15.Point> targetSquares) {
-        final List<List<Advent15.Point>> paths = targetSquares.stream().map(target -> this.findPath(agent, target)).filter(path -> !path.isEmpty()).sorted((path1, path2) -> {
+        final List<List<Advent15.Point>> paths = targetSquares.parallelStream()
+                                                              .map(target -> this.findPath(agent, target))
+                                                              .filter(path -> !path.isEmpty())
+                                                              .sorted((path1, path2) -> {
             final int compareSize = Integer.compare(path1.size(), path2.size());
             if (compareSize != 0) return compareSize;
             final Advent15.Point target1 = path1.get(path1.size() - 1);
@@ -193,7 +192,9 @@ public class Advent15 {
                                                  new Advent15.Point(current.getRow(), current.getCol() - 1), new Advent15.Point(current.getRow(), current.getCol() + 1)};
 
             Arrays.stream(candidates)
-                  .filter(neighbor -> this.grid[neighbor.getRow()][neighbor.getCol()] == Advent15.EMPTY).filter(neighbor -> !closedSet.contains(neighbor)).forEach(neighbor -> {
+                  .filter(neighbor -> this.grid[neighbor.getRow()][neighbor.getCol()] == Advent15.EMPTY)
+                  .filter(neighbor -> !closedSet.contains(neighbor))
+                  .forEach(neighbor -> {
                       final int tScore = gScore.get(current) + 1;
                       if (!openSet.contains(neighbor)) openSet.add(neighbor);
                       else if (tScore > gScore.get(neighbor)) return;
@@ -217,19 +218,15 @@ public class Advent15 {
             for (int col = 0; col < segments.length; col++) this.grid[row][col] = segments[col];
         }
 
-        int elfCounter    = 0;
-        int goblinCounter = 0;
-
         for (int row = 0; row < this.grid.length; row++)
-            for (int col = 0; col < this.grid[row].length; col++) {
+            for (int col = 0; col < this.grid[row].length; col++)
                 if (this.grid[row][col] == Advent15.ELF) {
-                    this.agents.put(Advent15.ELF * ++elfCounter, new Advent15.Agent(Advent15.ELF, row, col));
-                    this.grid[row][col] = Advent15.ELF * elfCounter;
+                    this.agents.add(new Advent15.Agent(Advent15.ELF, row, col));
+                    this.grid[row][col] = Advent15.ELF;
                 } else if (this.grid[row][col] == Advent15.GOBLIN) {
-                    this.agents.put(Advent15.GOBLIN * ++goblinCounter, new Advent15.Agent(Advent15.GOBLIN, row, col));
-                    this.grid[row][col] = Advent15.GOBLIN * goblinCounter;
+                    this.agents.add(new Advent15.Agent(Advent15.GOBLIN, row, col));
+                    this.grid[row][col] = Advent15.GOBLIN;
                 }
-            }
     }
 
     private void print() {
@@ -241,7 +238,7 @@ public class Advent15 {
                 else System.out.printf("%c", anInt);
             });
             System.out.print("     ");
-            this.agents.values().stream().filter(a -> !a.isDead()).filter(a -> a.getRow() == i).sorted(Comparator.comparingInt(Advent15.Agent::getCol)).forEach(System.out::print);
+            this.agents.stream().filter(a -> !a.isDead()).filter(a -> a.getRow() == i).sorted(Comparator.comparingInt(Advent15.Agent::getCol)).forEach(System.out::print);
             System.out.println();
         });
         System.out.println();
@@ -334,8 +331,9 @@ public class Advent15 {
             return this.attackPower;
         }
 
-        void reduceHitpoints(final int points) {
+        void reduceHitpoints(final int points) throws Advent15.DeadElfException {
             this.hitpoints -= points;
+            if (this.isDead() && this.type == Advent15.ELF && !Advent15.ignoreDeadElf) throw new Advent15.DeadElfException();
         }
 
         boolean isAlive() {
@@ -364,5 +362,5 @@ public class Advent15 {
         }
     }
 
-    static class DeadElfException extends Exception {}
+    private static class DeadElfException extends Exception {}
 }
