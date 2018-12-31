@@ -2,16 +2,16 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("StaticMethodOnlyUsedInOneClass")
 class Advent18 {
-    private static final char     OPEN       = '.';
-    private static final char     TREE       = '|';
-    private static final char     LUMBERYARD = '#';
-    private              char[][] grid;
+    private static final char                        OPEN        = '.';
+    private static final char                        TREE        = '|';
+    private static final char                        LUMBERYARD  = '#';
+    private final        Map<Integer, List<Integer>> knownCycles = new HashMap<>();
+    private              char[][]                    grid;
 
     static void printGrid(final char[][] grid) {
         for (final char[] chars : grid) {
@@ -22,19 +22,37 @@ class Advent18 {
         System.out.printf("%n%n");
     }
 
+    @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
     public static void main(final String... args) throws IOException {
         final Advent18 area = new Advent18();
         area.parseGridFromFile("src/main/resources/advent18.txt");
 
-        int minutes = 1000000000;
+        int       minutes = 1;
+        final int maxMin  = 1000;
+
+        int          cycleStart  = Integer.MIN_VALUE;
+        int          cycleLength = 0;
+        final long[] results     = new long[maxMin];
 
         do {
-            area.change();
-            Advent18.printGrid(area.getGrid());
+            area.change(minutes);
+            if (minutes == 10) System.out.printf("Total resource value after 10 minutes: %d%n", area.getResourceValue());
+            if (area.knownCycles.containsKey(Arrays.deepHashCode(area.grid))) {
+                if (cycleStart == Integer.MIN_VALUE) {
+                    System.err.printf("found cycle after %d minutes: %s%n", minutes, area.knownCycles.get(Arrays.deepHashCode(area.grid)));
+                    cycleStart = minutes;
+                }
+                if (cycleLength == 0 && area.knownCycles.get(Arrays.deepHashCode(area.grid)).size() > 1) {
+                    cycleLength = minutes - cycleStart;
+                    System.err.printf("cycle ends after %d minutes%n", cycleLength);
+                }
+                if (cycleLength > 0 && minutes > cycleStart + 2 * cycleLength) break;
+            }
+            if (cycleLength > 0) results[minutes % cycleLength] = area.getResourceValue();
         }
-        while (--minutes > 0);
+        while (++minutes < maxMin);
 
-        System.out.printf("Total resource value: %d%n", area.getResourceValue());
+        System.out.printf("Total resource value after 1000000000 minutes: %d%n", results[1000000000 % cycleLength]);
     }
 
     final long getResourceValue() {
@@ -50,7 +68,9 @@ class Advent18 {
             this.grid[row] = lines.get(row).toCharArray();
     }
 
-    final void change() {
+    final void change(final int curMin) {
+        this.knownCycles.putIfAbsent(Arrays.deepHashCode(this.grid), new ArrayList<>());
+        this.knownCycles.get(Arrays.deepHashCode(this.grid)).add(curMin);
         final char[][] newGrid = this.getGrid();
 
         for (int row = 0; row < newGrid.length; row++) {

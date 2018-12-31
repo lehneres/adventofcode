@@ -23,7 +23,7 @@ class Advent18Test {
 
         int minutes = 10;
 
-        do area.change();
+        do area.change(minutes);
         while (--minutes > 0);
 
         Advent18.printGrid(Advent18Test.getGridFromFile());
