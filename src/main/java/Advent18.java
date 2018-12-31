@@ -39,8 +39,8 @@ class Advent18 {
             if (minutes == 10) System.out.printf("Total resource value after 10 minutes: %d%n", area.getResourceValue());
             if (area.knownCycles.containsKey(Arrays.deepHashCode(area.grid))) {
                 if (cycleStart == Integer.MIN_VALUE) {
-                    System.err.printf("found cycle after %d minutes: %s%n", minutes, area.knownCycles.get(Arrays.deepHashCode(area.grid)));
                     cycleStart = minutes;
+                    System.err.printf("found cycle after %d minutes: %s%n", minutes, area.knownCycles.get(Arrays.deepHashCode(area.grid)));
                 }
                 if (cycleLength == 0 && area.knownCycles.get(Arrays.deepHashCode(area.grid)).size() > 1) {
                     cycleLength = minutes - cycleStart;
