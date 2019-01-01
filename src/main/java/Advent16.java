@@ -5,8 +5,9 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"MultipleTopLevelClassesInFile", "UtilityClass", "AccessingNonPublicFieldOfAnotherObject"})
-final class Advent16 {
+@SuppressWarnings({"MultipleTopLevelClassesInFile", "AccessingNonPublicFieldOfAnotherObject", "FeatureEnvy"})
+enum Advent16 {
+    ;
 
     private static final Pattern NON_NUMBERS = Pattern.compile("[^\\d.]");
 
@@ -64,7 +65,7 @@ final class Advent16 {
         return inputs;
     }
 
-    private static Map<Integer, Register.OPCODE> findOpCodes(final Collection<Advent16.Input> inputs) {
+    private static Map<Integer, Register.OPCODE> findOpCodes(final Iterable<Advent16.Input> inputs) {
         final Map<Integer, Register.OPCODE> opcodeMap        = new HashMap<>();
         final Map<Register.OPCODE, Integer> inverseOpcodeMap = new EnumMap<>(Register.OPCODE.class);
 
@@ -101,8 +102,9 @@ final class Advent16 {
     }
 }
 
-@SuppressWarnings({"UtilityClass", "MultipleTopLevelClassesInFile", "unused", "ClassNameDiffersFromFileName"})
-final class Register {
+@SuppressWarnings({"MultipleTopLevelClassesInFile", "unused", "ClassNameDiffersFromFileName"})
+enum Register {
+    ;
 
     private static int[] register = new int[4];
 
@@ -124,7 +126,7 @@ final class Register {
         }).collect(Collectors.toSet());
     }
 
-    @SuppressWarnings({"StandardVariableNames", "NonFinalStaticVariableUsedInClassInitialization", "UnqualifiedStaticUsage"})
+    @SuppressWarnings({"StandardVariableNames", "NonFinalStaticVariableUsedInClassInitialization", "UnqualifiedStaticUsage", "NonSerializableFieldInSerializableClass"})
     enum OPCODE {
 
         ADDR((a, b, c) -> register[c] = register[a] + register[b]),
