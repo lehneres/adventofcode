@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,7 +21,7 @@ public class Advent15 {
 
     public static void main(final String[] args) throws IOException, Advent15.DeadElfException {
         final Advent15 battle = new Advent15();
-        battle.readGridFromFile("src/main/resources/advent15.txt");
+        battle.readGridFromFile("java2018/main/resources/advent15.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
@@ -292,7 +290,7 @@ public class Advent15 {
 
         @SuppressWarnings("CompareToUsesNonFinalVariable")
         @Override
-        public int compareTo(final @NotNull Advent15.Point o) {
+        public int compareTo(final Advent15.Point o) {
             final int rowDiff = this.row - o.row;
             if (rowDiff != 0) return rowDiff;
             return this.col - o.col;
@@ -317,7 +315,7 @@ public class Advent15 {
         }
 
         @SuppressWarnings("CompareToUsesNonFinalVariable")
-        int compareTo(final @NotNull Advent15.Agent o) {
+        int compareTo(final Advent15.Agent o) {
             final int hitDiff = this.hitpoints - o.hitpoints;
             if (hitDiff != 0) return hitDiff;
             return super.compareTo(o);

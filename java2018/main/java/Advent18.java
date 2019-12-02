@@ -25,7 +25,7 @@ class Advent18 {
     @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
     public static void main(final String... args) throws IOException {
         final Advent18 area = new Advent18();
-        area.parseGridFromFile("src/main/resources/advent18.txt");
+        area.parseGridFromFile("java2018/main/resources/advent18.txt");
 
         int       minutes = 1;
         final int maxMin  = 1000;

@@ -11,7 +11,7 @@ class Advent19Test {
     @Test
     void testRegister() throws IOException {
         RegisterV2.setRegister(new int[]{0, 0, 0, 0, 0, 0});
-        final List<Map.Entry<RegisterV2.OPCODE, int[]>> input = Advent19.readInput("src/test/resources/advent19_Test_Input.txt");
+        final List<Map.Entry<RegisterV2.OPCODE, int[]>> input = Advent19.readInput("test/resources/advent19_Test_Input.txt");
 
         RegisterV2.process(input);
 

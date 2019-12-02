@@ -19,7 +19,7 @@ public final class Advent3 {
         final Pattern r = Pattern.compile("#(\\d+) @ (\\d+),(\\d+): (\\d+)x(\\d+)");
 
 
-        final Collection<int[]> claims = Files.lines(Paths.get("src/main/resources/advent3.txt")).map(s -> {
+        final Collection<int[]> claims = Files.lines(Paths.get("java2018/main/resources/advent3.txt")).map(s -> {
             Matcher matcher = r.matcher(s);
 
             int[] claim = new int[5];

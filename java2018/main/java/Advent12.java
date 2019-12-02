@@ -22,7 +22,7 @@ public final class Advent12 {
     public static void main(final String[] args) throws IOException {
         final Pattern r = Pattern.compile("([\\.#])([\\.#])([\\.#])([\\.#])([\\.#]) => ([\\.#])");
 
-        final Set<Advent12.Rule> rules = Files.lines(Paths.get("src/main/resources/advent12.txt")).map(s -> {
+        final Set<Advent12.Rule> rules = Files.lines(Paths.get("java2018/main/resources/advent12.txt")).map(s -> {
             final Matcher matcher = r.matcher(s);
             Advent12.Rule rule    = null;
 

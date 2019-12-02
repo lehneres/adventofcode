@@ -20,7 +20,7 @@ public final class Advent4 {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         final Pattern          r   = Pattern.compile("\\[(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2})\\] (.+#(\\d{1,4})|.+)");
 
-        final long[][] obs = Files.lines(Paths.get("src/main/resources/advent4.txt")).map(s -> {
+        final long[][] obs = Files.lines(Paths.get("java2018/main/resources/advent4.txt")).map(s -> {
             long[] entry = new long[3];
             try {
                 Matcher matcher = r.matcher(s);

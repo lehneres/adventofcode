@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,7 +13,7 @@ public final class Advent5 {
     private static final int Z        = 90;
 
     public static void main(final String[] args) throws IOException {
-        Files.lines(Paths.get("src/main/resources/advent5.txt")).forEach(s -> {
+        Files.lines(Paths.get("java2018/main/resources/advent5.txt")).forEach(s -> {
             final List<Integer> chars = Advent5.collapse(s);
             System.out.println(chars.stream().map(e -> Character.toString((char) e.intValue())).reduce((acc, e) -> acc + e).get());
             System.out.println(chars.size());
@@ -36,7 +34,7 @@ public final class Advent5 {
         });
     }
 
-    private static @NotNull List<Integer> collapse(final String s) {
+    private static List<Integer> collapse(final String s) {
         final ArrayList<Integer> chars = s.chars().boxed().collect(Collectors.toCollection(ArrayList::new));
         int                      i     = 1;
 

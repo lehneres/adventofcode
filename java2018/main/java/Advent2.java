@@ -12,7 +12,7 @@ public final class Advent2 {
     public static void main(final String... args) throws IOException {
 
         final int[]       cCount = new int[2];
-        final Set<String> boxIds = Files.lines(Paths.get("src/main/resources/advent2.txt")).collect(Collectors.toSet());
+        final Set<String> boxIds = Files.lines(Paths.get("java2018/main/resources/advent2.txt")).collect(Collectors.toSet());
 
         boxIds.forEach(boxId -> {
             final int[] localCount = new int[26];

@@ -35,7 +35,7 @@ enum Advent16 {
     }
 
     private static List<Integer[]> readInput2() throws IOException {
-        return Files.lines(Paths.get("src/main/resources/advent16_2.txt")).map(s -> {
+        return Files.lines(Paths.get("java2018/main/resources/advent16_2.txt")).map(s -> {
             final String[]  split = s.split(" ");
             final Integer[] asInt = new Integer[split.length];
             for (int i = 0; i < split.length; i++) asInt[i] = Integer.valueOf(split[i]);
@@ -46,7 +46,7 @@ enum Advent16 {
     private static Set<Advent16.Input> readInput1() throws IOException {
         final Set<Advent16.Input> inputs = new HashSet<>();
 
-        final String[] strings = Files.lines(Paths.get("src/main/resources/advent16_1.txt")).toArray(String[]::new);
+        final String[] strings = Files.lines(Paths.get("java2018/main/resources/advent16_1.txt")).toArray(String[]::new);
 
         for (int i = 2; i < strings.length; i += 4) {
             final String before = strings[i - 2];

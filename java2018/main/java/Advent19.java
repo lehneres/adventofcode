@@ -14,7 +14,7 @@ enum Advent19 {
     @SuppressWarnings("FeatureEnvy")
     public static void main(final String... args) throws IOException {
         RegisterV2.setRegister(new int[]{0, 0, 0, 0, 0, 0});
-        final List<Map.Entry<RegisterV2.OPCODE, int[]>> input = Advent19.readInput("src/main/resources/advent19.txt");
+        final List<Map.Entry<RegisterV2.OPCODE, int[]>> input = Advent19.readInput("java2018/main/resources/advent19.txt");
 
         RegisterV2.process(input);
         System.out.printf("Register after program part I: %s%n", Arrays.toString(RegisterV2.getRegister()));

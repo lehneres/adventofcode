@@ -15,7 +15,7 @@ public final class Advent9 {
 
     public static void main(final String... args) throws IOException {
 
-        final String input = Files.lines(Paths.get("src/main/resources/advent9.txt")).findFirst().get();
+        final String input = Files.lines(Paths.get("java2018/main/resources/advent9.txt")).findFirst().get();
 
         final Pattern r       = Pattern.compile("(\\d+) players; last marble is worth (\\d+) points");
         final Matcher matcher = r.matcher(input);

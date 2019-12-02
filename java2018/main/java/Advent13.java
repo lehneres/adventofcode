@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,7 +20,7 @@ public final class Advent13 {
     private static final int CART_UP         = '^';
     private static final int CART_DOWN       = 'v';
 
-    private final List<String>       lines = Files.lines(Paths.get("src/main/resources/advent13.txt")).collect(Collectors.toList());
+    private final List<String>       lines = Files.lines(Paths.get("java2018/main/resources/advent13.txt")).collect(Collectors.toList());
     private final int[][]            track = new int[this.lines.size()][];
     private final Set<Advent13.Cart> carts = new TreeSet<>();
 
@@ -194,7 +192,7 @@ public final class Advent13 {
 
         @SuppressWarnings("CompareToUsesNonFinalVariable")
         @Override
-        public int compareTo(final @NotNull Advent13.Cart o) {
+        public int compareTo(final Advent13.Cart o) {
             int compare = Integer.compare(this.row, o.row);
             if (compare == 0) compare = Integer.compare(this.col, o.col);
             return compare;

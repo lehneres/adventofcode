@@ -13,7 +13,7 @@ public final class Advent6 {
     @SuppressWarnings({"OverlyLongMethod", "OverlyComplexMethod"})
     public static void main(final String... args) throws IOException {
 
-        final Set<Integer[]> coordinates = Files.lines(Paths.get("src/main/resources/advent6.txt")).map(s -> {
+        final Set<Integer[]> coordinates = Files.lines(Paths.get("java2018/main/resources/advent6.txt")).map(s -> {
             String[] split = s.split(",");
             return new Integer[]{Integer.valueOf(split[0].trim()), Integer.valueOf(split[1].trim())};
         }).collect(Collectors.toSet());

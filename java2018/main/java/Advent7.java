@@ -31,7 +31,7 @@ public class Advent7 {
 
         final Pattern r = Pattern.compile("Step (\\w) must be finished before step (\\w) can begin.");
 
-        final Collection<Character[]> edges = Files.lines(Paths.get("src/main/resources/advent7.txt")).map(s -> {
+        final Collection<Character[]> edges = Files.lines(Paths.get("java2018/main/resources/advent7.txt")).map(s -> {
             final Matcher     matcher = r.matcher(s);
             final Character[] edge    = new Character[2];
 

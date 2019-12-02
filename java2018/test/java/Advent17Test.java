@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class Advent17Test {
 
     private static char[][] parseTestGrid() throws IOException {
-        return Files.lines(Paths.get("src/test/resources/advent17_Test_Grid.txt")).map(String::toCharArray).toArray(size -> new char[size][1]);
+        return Files.lines(Paths.get("test/resources/advent17_Test_Grid.txt")).map(String::toCharArray).toArray(size -> new char[size][1]);
     }
 
     @Test
@@ -21,7 +21,7 @@ class Advent17Test {
 
         final Advent17 ground = new Advent17();
 
-        final Set<int[]> input = Advent17.parseInput("src/test/resources/advent17_Test_Input.txt");
+        final Set<int[]> input = Advent17.parseInput("test/resources/advent17_Test_Input.txt");
 
         ground.initGrid(input);
 
@@ -41,7 +41,7 @@ class Advent17Test {
 
         final Advent17 ground = new Advent17();
 
-        final Set<int[]> input = Advent17.parseInput("src/test/resources/advent17_Test_Input.txt");
+        final Set<int[]> input = Advent17.parseInput("test/resources/advent17_Test_Input.txt");
 
         ground.initGrid(input);
 

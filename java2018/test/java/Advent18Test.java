@@ -17,7 +17,7 @@ class Advent18Test {
     final void test10Minutes() throws IOException {
         final Advent18 area = new Advent18();
 
-        area.parseGridFromFile("src/test/resources/advent18_Test_Area.txt");
+        area.parseGridFromFile("test/resources/advent18_Test_Area.txt");
 
         Advent18.printGrid(area.getGrid());
 
@@ -33,7 +33,7 @@ class Advent18Test {
     }
 
     private static char[][] getGridFromFile() throws IOException {
-        final List<String> lines = Files.lines(Paths.get("src/test/resources/advent18_Test_After10.txt")).collect(Collectors.toList());
+        final List<String> lines = Files.lines(Paths.get("test/resources/advent18_Test_After10.txt")).collect(Collectors.toList());
 
         final char[][] grid = new char[lines.size()][];
         for (int row = 0; row < lines.size(); row++)

@@ -1,5 +1,3 @@
-import org.jetbrains.annotations.Nullable;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,7 +9,7 @@ final class Advent8 {
 
     public static void main(final String... args) throws IOException {
 
-        final List<Integer> input = Files.lines(Paths.get("src/main/resources/advent8.txt"))
+        final List<Integer> input = Files.lines(Paths.get("java2018/main/resources/advent8.txt"))
                                          .map(s -> s.split(" "))
                                          .flatMap(Arrays::stream)
                                          .map(Integer::valueOf)
@@ -33,7 +31,7 @@ final class Advent8 {
         System.out.println(tree != null ? tree.getValue() : 0);
     }
 
-    private static @Nullable Advent8.Node getTree(final Iterable<Integer> input) {
+    private static Advent8.Node getTree(final Iterable<Integer> input) {
         Advent8.Node            tree     = null;
         final Iterator<Integer> iterator = input.iterator();
         if (iterator.hasNext()) tree = Advent8.processInputSequence(iterator);

@@ -29,33 +29,33 @@ class Advent15Test {
     void testBasicMovement() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_SmallTest_Movement.txt");
+        battle.readGridFromFile("test/resources/advent15_SmallTest_Movement.txt");
 
         battle.play(false, 1);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_SmallTest_Movement_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_SmallTest_Movement_Result.txt")), "result is not equal");
     }
 
     @Test
     void testMovement() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Movement.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Movement.txt");
 
         battle.play(false, 3);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Movement_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Movement_Result.txt")), "result is not equal");
     }
 
     @Test
     void testAttack1() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Attack.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Attack.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Attack_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Attack_Result.txt")), "result is not equal");
 
         final String outcome = battle.getOutcome();
 
@@ -66,11 +66,11 @@ class Advent15Test {
     void testAttack2() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Attack2.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Attack2.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Attack2_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Attack2_Result.txt")), "result is not equal");
 
         final String outcome = battle.getOutcome();
 
@@ -81,11 +81,11 @@ class Advent15Test {
     void testAttack3() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Attack3.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Attack3.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Attack3_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Attack3_Result.txt")), "result is not equal");
 
         final String outcome = battle.getOutcome();
 
@@ -96,11 +96,11 @@ class Advent15Test {
     void testAttack4() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Attack4.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Attack4.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Attack4_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Attack4_Result.txt")), "result is not equal");
 
         final String outcome = battle.getOutcome();
 
@@ -111,11 +111,11 @@ class Advent15Test {
     void testAttack5() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Attack5.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Attack5.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Attack5_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Attack5_Result.txt")), "result is not equal");
 
         final String outcome = battle.getOutcome();
 
@@ -126,11 +126,11 @@ class Advent15Test {
     void testAttack6() throws Exception {
         final Advent15 battle = new Advent15();
 
-        battle.readGridFromFile("src/test/resources/advent15_Test_Attack6.txt");
+        battle.readGridFromFile("test/resources/advent15_Test_Attack6.txt");
 
         battle.play(false, Integer.MAX_VALUE);
 
-        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("src/test/resources/advent15_Test_Attack6_Result.txt")), "result is not equal");
+        assertTrue(Arrays.deepEquals(battle.getGrid(), Advent15Test.readGridFromFile("test/resources/advent15_Test_Attack6_Result.txt")), "result is not equal");
 
         final String outcome = battle.getOutcome();
 

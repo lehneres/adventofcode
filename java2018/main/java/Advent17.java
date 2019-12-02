@@ -27,7 +27,7 @@ class Advent17 {
     public static void main(final String... args) throws IOException {
         final Advent17 ground = new Advent17();
 
-        final Set<int[]> input = Advent17.parseInput("src/main/resources/advent17.txt");
+        final Set<int[]> input = Advent17.parseInput("java2018/main/resources/advent17.txt");
 
         ground.initGrid(input);
 

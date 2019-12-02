@@ -13,7 +13,7 @@ public final class Advent10 {
     public static void main(final String[] args) throws IOException {
         final Pattern r = Pattern.compile("position=<((-?|\\s)\\d+), ((-?|\\s)\\d+)> velocity=<((-?|\\s)\\d+), ((-?|\\s)\\d+)>");
 
-        final Set<Advent10.Point> points = Files.lines(Paths.get("src/main/resources/advent10.txt")).map(s -> {
+        final Set<Advent10.Point> points = Files.lines(Paths.get("java2018/main/resources/advent10.txt")).map(s -> {
             final Matcher  matcher = r.matcher(s);
             Advent10.Point point   = null;
 
