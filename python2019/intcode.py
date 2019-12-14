@@ -12,12 +12,14 @@ def get_params(nmemory, pointer, n):
 
 
 class IntCodeMachine:
-    def __init__(self, memory):
+    def __init__(self, memory, inputs=[]):
         self.isStopped = False
         self.out = []
         self.pointer = 0
         self.init_memory = memory.copy()
         self.memory = memory
+        self.inputs = inputs
+        self.input_pointer = 0
 
     def opcode(self):
         def addition():
@@ -63,24 +65,35 @@ class IntCodeMachine:
         def get_input():
             params = get_params(self.memory, self.pointer, 1)
             print('IN (%s)' % params)
-            self.memory[params[0][0]] = int(input("Enter value to continue..."))
+            if len(self.inputs) == 0:
+                self.memory[params[0][0]] = int(input("Enter value to continue..."))
+            else:
+                self.memory[params[0][0]] = self.inputs[self.input_pointer]
+                self.input_pointer += 1
             self.pointer += 2
 
-        def print_stdout():
+        def output():
             params = get_params(self.memory, self.pointer, 1)
             print('OUT (%s)' % params)
             self.out.append(get_value(self.memory, *params[0]))
             self.pointer += 2
+            return get_value(self.memory, *params[0])
 
         def stop():
             self.isStopped = True
 
-        return {1: addition, 2: multiplication, 3: get_input, 4: print_stdout, 5: jump_if_true, 6: jump_if_false, 7: less_than, 8: equals, 99: stop}.get(
+        return {1: addition, 2: multiplication, 3: get_input, 4: output, 5: jump_if_true, 6: jump_if_false, 7: less_than, 8: equals, 99: stop}.get(
                 int(str(self.memory[self.pointer])[-2:]))()
+
+    def set_inputs(self, inputs):
+        self.inputs = inputs.copy()
+        self.input_pointer = 0
 
     def run(self):
         while not self.isStopped:
-            self.opcode()
+            step = self.opcode()
+            if step is not None:
+                yield step
 
     def reset(self):
         self.__init__(self.init_memory.copy())
