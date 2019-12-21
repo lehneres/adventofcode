@@ -1,6 +1,5 @@
 import itertools
-from PIL import Image
-import numpy as np
+
 from aocd.models import Puzzle
 
 
