@@ -1,0 +1,16 @@
+{
+  "adventConfig":    {
+    "year":         "2020",
+    "nameTemplate": "day-{{num}}/code.js",
+    "templateFile": "template.js"
+  },
+  "scripts":         {
+    "test": "mocha day-**/test.js"
+  },
+  "dependencies":    {
+    "advent-of-code": "^5.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^8.2.1"
+  }
+}
