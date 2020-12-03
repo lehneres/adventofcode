@@ -55,3 +55,4 @@ fabric.properties
 hs_err_pid*
 
 package-lock.json
+yarn.lock
