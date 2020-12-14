@@ -26,7 +26,7 @@ const part1 = (input) => {
 const part2 = (input) => {
     const data   = input.split('\n').map(x => x.trim())
     const busses = data[1].split(',').map(x => parseInt(x))
-    let tstamp   = 0
+    let tstamp   = busses[0]
     let factor   = busses[0]
     for (let offset = 1; offset < busses.length; offset++)
         if (!isNaN(busses[offset]))
